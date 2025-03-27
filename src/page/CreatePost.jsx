@@ -33,7 +33,7 @@ const CreatePost = () => {
     try {
       setGeneratingImg(true);
   
-      const response = await fetch("https://ai-image-generator-bgr8.onrender.com/api/v1/stability", {  // Update endpoint
+      const response = await fetch("https://ai-image-generation-be-fosk.onrender.com/api/v1/stability", {  // Update endpoint
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +67,7 @@ const CreatePost = () => {
     if (form.prompt && form.photo) {
       setLoading(true);
       try {
-        const response = await fetch('https://ai-image-generator-bgr8.onrender.com/api/v1/post', {
+        const response = await fetch('https://ai-image-generation-be-fosk.onrender.com/api/v1/post', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
