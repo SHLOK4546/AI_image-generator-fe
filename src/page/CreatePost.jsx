@@ -67,7 +67,7 @@ const CreatePost = () => {
     if (form.prompt && form.photo) {
       setLoading(true);
       try {
-        const response = await fetch('https://ai-image-generation-be-fosk.onrender.com/api/v1/post', {
+        const response = await fetch('https://ai-image-generation-be-fosk.onrender.com/api/v1/stability', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -90,10 +90,15 @@ const CreatePost = () => {
 
   return (
     <section className="max-w-7xl mx-auto">
+     
       <div>
-        <h1 className="font-extrabold text-[#222328] text-[32px]">Create</h1>
-        <p className="mt-2 text-[#666e75] text-[14px] max-w-[500px]">Generate an imaginative image through DALL-E AI and share it with the community</p>
-      </div>
+  <h5 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 drop-shadow-lg">
+    Create
+  </h5>
+  <p className="mt-2 text-[#666e75] text-[16px] max-w-[500px] font-medium leading-relaxed">
+    Generate an imaginative image and share it with the community.
+  </p>
+</div>
 
       <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-5">
