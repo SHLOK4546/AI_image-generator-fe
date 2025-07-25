@@ -7,106 +7,70 @@ import { FormField, Loader } from '../components';
 
 const CreatePost = () => {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    name: '',
-    prompt: '',
-    photo: '',
-  });
-
+  const [form, setForm] = useState({ name: '', prompt: '', photo: '' });
   const [generatingImg, setGeneratingImg] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
   const handleSurpriseMe = () => {
     const randomPrompt = getRandomPrompt(form.prompt);
     setForm({ ...form, prompt: randomPrompt });
   };
 
   const generateImage = async () => {
-    if (!form.prompt) {
-      alert("Please provide a proper prompt");
-      return;
-    }
-  
+    if (!form.prompt) return alert('Please provide a proper prompt');
     try {
       setGeneratingImg(true);
-  
-      const response = await fetch("https://ai-image-generation-be-fosk.onrender.com/api/v1/stability", {  // Update endpoint
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt: form.prompt }),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      }
-  
-      const data = await response.json();
-  
-      if (!data.photo) {
-        throw new Error("No image returned from API");
-      }
-  
-      setForm({ ...form, photo: data.photo }); // Already in base64 format
+      const res = await fetch(
+        'https://ai-image-generation-be-fosk.onrender.com/api/v1/stability',
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: form.prompt }) }
+      );
+      if (!res.ok) throw new Error(`Error: ${res.statusText}`);
+      const data = await res.json();
+      setForm((prev) => ({ ...prev, photo: data.photo }));
     } catch (err) {
-      console.error("Error generating image:", err);
-      alert(`Failed to generate image: ${err.message}`);
+      console.error(err);
+      alert(`Failed: ${err.message}`);
     } finally {
       setGeneratingImg(false);
     }
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (form.prompt && form.photo) {
+    if (!form.prompt || !form.photo) return alert('Generate an image first');
+    try {
       setLoading(true);
-      try {
-        const response = await fetch('https://ai-image-generation-be-fosk.onrender.com/api/v1/stability', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ...form }),
-        });
-
-        await response.json();
-        alert('Success');
-        navigate('/');
-      } catch (err) {
-        alert(err);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      alert('Please generate an image with proper details');
+      await fetch('https://ai-image-generation-be-fosk.onrender.com/api/v1/stability', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form)
+      });
+      alert('Shared successfully!');
+      navigate('/');
+    } catch (err) {
+      alert(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <section className="max-w-7xl mx-auto">
-     
-      <div>
-  <h5 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 drop-shadow-lg">
-    Create
-  </h5>
-  <p className="mt-2 text-[#666e75] text-[16px] max-w-[500px] font-medium leading-relaxed">
-    Generate an imaginative image and share it with the community.
-  </p>
-</div>
+    <section className="flex flex-col items-center py-8 px-4 sm:px-6 lg:px-8">
+      <div className="text-center max-w-xl">
+        <h2 className="text-3xl sm:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">
+          Create & Share
+        </h2>
+        <p className="mt-3 text-gray-300 text-lg leading-relaxed">
+          Generate an imaginative image and share it with the community.
+        </p>
+      </div>
 
-      <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="mt-8 w-full max-w-2xl space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             labelName="Your Name"
             type="text"
             name="name"
-            placeholder="Ex., john doe"
+            placeholder="Loki"
             value={form.name}
             handleChange={handleChange}
           />
@@ -115,53 +79,41 @@ const CreatePost = () => {
             labelName="Prompt"
             type="text"
             name="prompt"
-            placeholder="An Impressionist oil painting of sunflowers in a purple vase…"
+            placeholder="Sunset over a mountain range..."
             value={form.prompt}
             handleChange={handleChange}
             isSurpriseMe
             handleSurpriseMe={handleSurpriseMe}
           />
-
-          <div className="relative bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-3 h-64 flex justify-center items-center">
-            { form.photo ? (
-              <img
-                src={form.photo}
-                alt={form.prompt}
-                className="w-full h-full object-contain"
-              />
-            ) : (
-              <img
-                src={preview}
-                alt="preview"
-                className="w-9/12 h-9/12 object-contain opacity-40"
-              />
-            )}
-
-            {generatingImg && (
-              <div className="absolute inset-0 z-0 flex justify-center items-center bg-[rgba(0,0,0,0.5)] rounded-lg">
-                <Loader />
-              </div>
-            )}
-          </div>
         </div>
 
-        <div className="mt-5 flex gap-5">
+        <div className="relative bg-gray-800 border-2 border-gray-600 rounded-lg flex justify-center items-center h-64">
+          {form.photo ? (
+            <img src={form.photo} alt={form.prompt} className="object-cover w-full h-full rounded-lg" />
+          ) : (
+            <img src={preview} alt="preview" className="w-1/2 opacity-30" />
+          )}
+          {generatingImg && (
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+              <Loader />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
           <button
             type="button"
             onClick={generateImage}
-            className=" text-white bg-green-700 font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+            className="flex-1 bg-green-600 hover:bg-green-500 text-white font-semibold py-2 rounded-md transition"
           >
-            {generatingImg ? 'Generating...' : 'Generate'}
+            {generatingImg ? 'Generating...' : 'Generate Image'}
           </button>
-        </div>
 
-        <div className="mt-10">
-          <p className="mt-2 text-[#666e75] text-[14px]">** Once you have created the image you want, you can share it with others in the community **</p>
           <button
             type="submit"
-            className="mt-3 text-white bg-[#6469ff] font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+            className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded-md transition"
           >
-            {loading ? 'Sharing...' : 'Share with the Community'}
+            {loading ? 'Sharing...' : 'Share to Community'}
           </button>
         </div>
       </form>
